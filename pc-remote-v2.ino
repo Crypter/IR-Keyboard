@@ -6,7 +6,7 @@
 
 #include <IRremote.h>
 #include "HID-Project.h"
-#define code_index_length 32
+#define code_index_length 33
 uint64_t code_index[code_index_length]={
 0x000000100000000E,
 0x000000110000000E,
@@ -29,7 +29,7 @@ uint64_t code_index[code_index_length]={
 0x000000030000000E,
 0x000000090000000E,
 0x0000001C0000000E,
-0x000000130000000E,
+0x0000000700040007,
 0x0000001D0000000E,
 0x000000120000000E,
 0x000000250000000E,
@@ -39,7 +39,8 @@ uint64_t code_index[code_index_length]={
 0x0000000C0000000E,
 0x0000002100040007,
 0x0000003900040007,
-0x000000380000000E
+0x000000F000040007,
+0x0000004500040007
 };
 
 uint32_t current_event_time=0, last_event_time=0, last_data_time=0, last_execution_time=0;
@@ -84,7 +85,8 @@ void button_press(){
     else if (current_event_code == 0x000000050000000E) Keyboard.write(HID_KEYBOARD_ENTER);
     
     else if (current_event_code == 0x000000240000000E) Keyboard.write(HID_KEYBOARD_F11);
-    else if (current_event_code == 0x000000380000000E) Keyboard.write(HID_KEYBOARD_F5);
+    else if (current_event_code == 0x000000F000040007) Keyboard.write(HID_KEYBOARD_F5);
+    else if (current_event_code == 0x0000004500040007) Keyboard.write(HID_KEYBOARD_LEFT_ALT);
 
     else if (current_event_code == 0x0000009500040007) System.write(HID_SYSTEM_SLEEP);
     
@@ -147,7 +149,7 @@ void button_press(){
       Keyboard.releaseAll();
     }
     else if (current_event_code == 0x0000001C0000000E) { if (logarithmic_delay_run(250, 500)) Mouse.move(0, -1); repeat_action=1; } //up
-    else if (current_event_code == 0x000000130000000E) { if (logarithmic_delay_run(250, 500)) Mouse.move(-1, 0); repeat_action=1; } //left
+    else if (current_event_code == 0x0000000700040007) { if (logarithmic_delay_run(250, 500)) Mouse.move(-1, 0); repeat_action=1; } //left
     else if (current_event_code == 0x0000001D0000000E) { if (logarithmic_delay_run(250, 500)) Mouse.move(0,  1); repeat_action=1; } //down
     else if (current_event_code == 0x000000120000000E) { if (logarithmic_delay_run(250, 500)) Mouse.move(1,  0); repeat_action=1; } //right
     else if (current_event_code == 0x000000250000000E) Mouse.click(MOUSE_LEFT);
@@ -249,7 +251,7 @@ void setup() {
   Keyboard.begin();
   Consumer.begin();
   System.begin();
-  Serial.begin(115200);
+  Serial.begin(2000000);
 }
 
 void loop() {
