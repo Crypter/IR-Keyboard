@@ -6,7 +6,7 @@
 
 #include <IRremote.h>
 #include "HID-Project.h"
-#define code_index_length 33
+#define code_index_length 34
 uint64_t code_index[code_index_length]={
 0x000000100000000E,
 0x000000110000000E,
@@ -40,7 +40,8 @@ uint64_t code_index[code_index_length]={
 0x0000002100040007,
 0x0000003900040007,
 0x000000F000040007,
-0x0000004500040007
+0x0000004500040007,
+0x000000380000000E
 };
 
 uint32_t current_event_time=0, last_event_time=0, last_data_time=0, last_execution_time=0;
@@ -72,6 +73,8 @@ void button_press(){
     }
     else if (current_event_code == 0x0000000D0000000E) Consumer.write(MEDIA_VOLUME_MUTE);
     else if (current_event_code == 0x000000320000000E) Consumer.write(MEDIA_PLAY_PAUSE);
+    else if (current_event_code == 0x000000340000000E) Consumer.write(MEDIA_NEXT);
+    else if (current_event_code == 0x000000370000000E) Consumer.write(MEDIA_PREVIOUS);
     else if (current_event_code == 0x0000003E0000000E) Consumer.write(CONSUMER_BROWSER_HOME);
 
     else if (current_event_code == 0x000000260000000E) Keyboard.write(HID_KEYBOARD_ESCAPE);
@@ -146,6 +149,11 @@ void button_press(){
     else if (current_event_code == 0x0000003900040007) {
       Keyboard.press(HID_KEYBOARD_LEFT_CONTROL);
       Keyboard.press(HID_KEYBOARD_PAGE_DOWN);
+      Keyboard.releaseAll();
+    }
+    else if (current_event_code == 0x000000380000000E) {
+      Keyboard.press(HID_KEYBOARD_LEFT_GUI);
+      Keyboard.press('l');
       Keyboard.releaseAll();
     }
     else if (current_event_code == 0x0000001C0000000E) { if (logarithmic_delay_run(250, 500)) Mouse.move(0, -1); repeat_action=1; } //up
