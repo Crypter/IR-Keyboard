@@ -6,7 +6,7 @@
 
 #include <IRremote.h>
 #include "HID-Project.h"
-#define code_index_length 34
+#define code_index_length 36
 uint64_t code_index[code_index_length]={
 0x000000100000000E,
 0x000000110000000E,
@@ -41,7 +41,9 @@ uint64_t code_index[code_index_length]={
 0x0000003900040007,
 0x000000F000040007,
 0x0000004500040007,
-0x000000380000000E
+0x000000380000000E,
+0x000000340000000E,
+0x000000370000000E
 };
 
 uint32_t current_event_time=0, last_event_time=0, last_data_time=0, last_execution_time=0;
@@ -252,7 +254,7 @@ void setup() {
   pinMode(3, OUTPUT);
   digitalWrite(3, HIGH);
 
-  pinMode(IR_RECEIVE_PIN, INPUT);
+  pinMode(IR_RECEIVE_PIN, INPUT_PULLUP);
   IrReceiver.begin(IR_RECEIVE_PIN);
 
   Mouse.begin();
@@ -267,9 +269,5 @@ void loop() {
   if (repeat_action){
     button_press();
   }
-//  Serial.println();
-//  Serial.print(millis()-last_execution_time);
-//  Serial.print(" > ");
-//  Serial.println(logarithmic_delay(250));
 
 }
