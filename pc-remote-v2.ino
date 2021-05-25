@@ -41,7 +41,7 @@ uint64_t code_index[code_index_length]={
 0x0000003900040007,
 0x000000F000040007,
 0x0000004500040007,
-0x000000380000000E,
+0x0000000B00040007,
 0x000000340000000E,
 0x000000370000000E
 };
@@ -153,15 +153,15 @@ void button_press(){
       Keyboard.press(HID_KEYBOARD_PAGE_DOWN);
       Keyboard.releaseAll();
     }
-    else if (current_event_code == 0x000000380000000E) {
+    else if (current_event_code == 0x0000000B00040007) {
       Keyboard.press(HID_KEYBOARD_LEFT_GUI);
       Keyboard.press('l');
       Keyboard.releaseAll();
     }
-    else if (current_event_code == 0x0000001C0000000E) { if (logarithmic_delay_run(250, 500)) Mouse.move(0, -1); repeat_action=1; } //up
-    else if (current_event_code == 0x0000000700040007) { if (logarithmic_delay_run(250, 500)) Mouse.move(-1, 0); repeat_action=1; } //left
-    else if (current_event_code == 0x0000001D0000000E) { if (logarithmic_delay_run(250, 500)) Mouse.move(0,  1); repeat_action=1; } //down
-    else if (current_event_code == 0x000000120000000E) { if (logarithmic_delay_run(250, 500)) Mouse.move(1,  0); repeat_action=1; } //right
+    else if (current_event_code == 0x0000001C0000000E) { if (logarithmic_delay_run(300, 500)) Mouse.move(0, -1); repeat_action=1; } //up
+    else if (current_event_code == 0x0000000700040007) { if (logarithmic_delay_run(300, 500)) Mouse.move(-1, 0); repeat_action=1; } //left
+    else if (current_event_code == 0x0000001D0000000E) { if (logarithmic_delay_run(300, 500)) Mouse.move(0,  1); repeat_action=1; } //down
+    else if (current_event_code == 0x000000120000000E) { if (logarithmic_delay_run(300, 500)) Mouse.move(1,  0); repeat_action=1; } //right
     else if (current_event_code == 0x000000250000000E) Mouse.click(MOUSE_LEFT);
     else if (current_event_code == 0x0000003B0000000E) Mouse.click(MOUSE_RIGHT);
     else return 0;
