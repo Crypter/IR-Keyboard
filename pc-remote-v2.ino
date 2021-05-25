@@ -6,7 +6,7 @@
 
 #include <IRremote.h>
 #include "HID-Project.h"
-#define code_index_length 36
+#define code_index_length 41
 uint64_t code_index[code_index_length]={
 0x000000100000000E,
 0x000000110000000E,
@@ -43,7 +43,13 @@ uint64_t code_index[code_index_length]={
 0x0000004500040007,
 0x0000000B00040007,
 0x000000340000000E,
-0x000000370000000E
+0x000000370000000E,
+0x0000001300120007, //air-purifier power
+0x0000001100120007, //air-purifier up
+0x0000001200120007, //air-purifier turbo
+0x0000001600120007, //air-purifier auto
+0x0000001000120007, //air-purifier down
+
 };
 
 uint32_t current_event_time=0, last_event_time=0, last_data_time=0, last_execution_time=0;
@@ -65,18 +71,18 @@ void button_press(){
 //  Serial.println("BUTTON DOWN!");
     repeat_action=0;
 
-    if (current_event_code == 0x000000100000000E) {
+    if (current_event_code == 0x000000100000000E || current_event_code == 0x0000001100120007) {
       if (logarithmic_delay_run(250)) Consumer.write(MEDIA_VOLUME_UP);
       repeat_action=1;
     }
-    else if (current_event_code == 0x000000110000000E) {
+    else if (current_event_code == 0x000000110000000E || current_event_code == 0x0000001000120007) {
       if (logarithmic_delay_run(250)) Consumer.write(MEDIA_VOLUME_DOWN);
       repeat_action=1;
     }
     else if (current_event_code == 0x0000000D0000000E) Consumer.write(MEDIA_VOLUME_MUTE);
-    else if (current_event_code == 0x000000320000000E) Consumer.write(MEDIA_PLAY_PAUSE);
-    else if (current_event_code == 0x000000340000000E) Consumer.write(MEDIA_NEXT);
-    else if (current_event_code == 0x000000370000000E) Consumer.write(MEDIA_PREVIOUS);
+    else if (current_event_code == 0x000000320000000E || current_event_code == 0x0000001300120007) Consumer.write(MEDIA_PLAY_PAUSE);
+    else if (current_event_code == 0x000000340000000E || current_event_code == 0x0000001600120007) Consumer.write(MEDIA_NEXT);
+    else if (current_event_code == 0x000000370000000E || current_event_code == 0x0000001200120007) Consumer.write(MEDIA_PREVIOUS);
     else if (current_event_code == 0x0000003E0000000E) Consumer.write(CONSUMER_BROWSER_HOME);
 
     else if (current_event_code == 0x000000260000000E) Keyboard.write(HID_KEYBOARD_ESCAPE);
