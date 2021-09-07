@@ -2,11 +2,16 @@
 #define DECODE_RC5
 //#define DECODE_RC6
 #define NO_LEGACY_COMPATIBILITY
-#define IR_RECEIVE_PIN 5
+#define IR_RECEIVE_PIN 3
 
+int RXLED = 17; // The RX LED has a defined Arduino pin
+int TXLED = 30; // The TX LED has a defined Arduino pin
+
+#include <EEPROM.h>
 #include <IRremote.h>
 #include "HID-Project.h"
-#define code_index_length 41
+
+#define code_index_length 43
 uint64_t code_index[code_index_length]={
 0x000000100000000E,
 0x000000110000000E,
@@ -44,6 +49,8 @@ uint64_t code_index[code_index_length]={
 0x0000000B00040007,
 0x000000340000000E,
 0x000000370000000E,
+0x000000360000000E, //stop
+0x000000AB00040007, //guide
 0x0000001300120007, //air-purifier power
 0x0000001100120007, //air-purifier up
 0x0000001200120007, //air-purifier turbo
@@ -57,6 +64,9 @@ uint64_t current_event_code=0, last_event_code=0;
 uint8_t current_event_button_state=0, last_event_button_state=0;
 
 uint8_t repeat_action=0;
+
+uint8_t mouse_jiggler=EEPROM.read(0);
+uint32_t last_jiggle=0;
 
 uint8_t logarithmic_delay_run(uint32_t max_delay, uint32_t speed=50000){
   if ( ((millis()-last_execution_time)>(millis()-current_event_time)) || (millis()-last_execution_time) > min(speed/(millis()-current_event_time), max_delay)){
@@ -100,6 +110,15 @@ void button_press(){
     else if (current_event_code == 0x0000004500040007) Keyboard.write(HID_KEYBOARD_LEFT_ALT);
 
     else if (current_event_code == 0x0000009500040007) System.write(HID_SYSTEM_SLEEP);
+    
+    else if (current_event_code == 0x000000AB00040007) {
+      mouse_jiggler = !mouse_jiggler;
+      EEPROM.update(0, mouse_jiggler);
+      if (!mouse_jiggler){
+        digitalWrite(RXLED, HIGH);
+        digitalWrite(TXLED, HIGH);
+      }
+    }
     
     else if (current_event_code == 0x000000330000000E) {
       Keyboard.press(HID_KEYBOARD_LEFT_CONTROL);
@@ -164,15 +183,21 @@ void button_press(){
       Keyboard.press('l');
       Keyboard.releaseAll();
     }
-    else if (current_event_code == 0x0000001C0000000E) { if (logarithmic_delay_run(300, 500)) Mouse.move(0, -1); repeat_action=1; } //up
+    else if (current_event_code == 0x000000360000000E) {
+      Keyboard.press(HID_KEYBOARD_LEFT_CONTROL);
+      Keyboard.press('w');
+      Keyboard.releaseAll();
+    }
+    else if (current_event_code == 0x0000001C0000000E) { if (logarithmic_delay_run(300, 500)) Mouse.move(0, -1); repeat_action=1;  } //up
     else if (current_event_code == 0x0000000700040007) { if (logarithmic_delay_run(300, 500)) Mouse.move(-1, 0); repeat_action=1; } //left
     else if (current_event_code == 0x0000001D0000000E) { if (logarithmic_delay_run(300, 500)) Mouse.move(0,  1); repeat_action=1; } //down
     else if (current_event_code == 0x000000120000000E) { if (logarithmic_delay_run(300, 500)) Mouse.move(1,  0); repeat_action=1; } //right
     else if (current_event_code == 0x000000250000000E) Mouse.click(MOUSE_LEFT);
     else if (current_event_code == 0x0000003B0000000E) Mouse.click(MOUSE_RIGHT);
-    else return 0;
-    return 1;
+    else return 1;
 
+    last_jiggle=millis();
+   return 0;
 }
 void button_release(){
 //  Serial.println("BUTTON UP!");
@@ -195,7 +220,7 @@ void IREventHandler(){
       IrReceiver.resume();
       return;
     }
-	    uint32_t low = new_event_code;
+	  uint32_t low = new_event_code;
     uint32_t high = (new_event_code >> 32);
     char buf[32];
     sprintf(buf, "0x%08lX%08lX", high, low);
@@ -255,13 +280,16 @@ void IREventHandler(){
 
 
 void setup() {
-  pinMode(2, OUTPUT);
-  digitalWrite(2, LOW);
-  pinMode(3, OUTPUT);
-  digitalWrite(3, HIGH);
+  pinMode(0, OUTPUT);
+  digitalWrite(0, LOW);
+  pinMode(1, OUTPUT);
+  digitalWrite(1, HIGH);
 
   pinMode(IR_RECEIVE_PIN, INPUT_PULLUP);
   IrReceiver.begin(IR_RECEIVE_PIN);
+
+  pinMode(RXLED, OUTPUT); // Set RX LED as an output
+  pinMode(TXLED, OUTPUT); // Set TX LED as an output
 
   Mouse.begin();
   Keyboard.begin();
@@ -274,6 +302,21 @@ void loop() {
   IREventHandler();
   if (repeat_action){
     button_press();
+  }
+
+
+
+  if (mouse_jiggler){
+    uint8_t pattern = (millis()/500)%2;
+    digitalWrite(RXLED, pattern);
+    digitalWrite(TXLED, !pattern);
+  }
+
+  if (mouse_jiggler && millis()-last_jiggle>50000){
+    Mouse.move(+10, 0);
+    Mouse.move(-10, 0);
+    
+    last_jiggle=millis();
   }
 
 }
