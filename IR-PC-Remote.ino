@@ -1,8 +1,8 @@
-#define DECODE_NEC
-#define DECODE_RC5
+//#define DECODE_NEC
+//#define DECODE_RC5
 //#define DECODE_RC6
 #define NO_LEGACY_COMPATIBILITY
-#define IR_RECEIVE_PIN 3
+#define IR_RECEIVE_PIN 14
 
 int RXLED = 17; // The RX LED has a defined Arduino pin
 int TXLED = 30; // The TX LED has a defined Arduino pin
@@ -11,7 +11,7 @@ int TXLED = 30; // The TX LED has a defined Arduino pin
 #include <IRremote.h>
 #include "HID-Project.h"
 
-#define code_index_length 43
+#define code_index_length 46
 uint64_t code_index[code_index_length]={
 0x000000100000000E,
 0x000000110000000E,
@@ -56,7 +56,9 @@ uint64_t code_index[code_index_length]={
 0x0000001200120007, //air-purifier turbo
 0x0000001600120007, //air-purifier auto
 0x0000001000120007, //air-purifier down
-
+0x000000010000000E, //1
+0x000000070000000E, //7
+0x000000000000000E  //0
 };
 
 uint32_t current_event_time=0, last_event_time=0, last_data_time=0, last_execution_time=0;
@@ -188,12 +190,23 @@ void button_press(){
       Keyboard.press('w');
       Keyboard.releaseAll();
     }
-    else if (current_event_code == 0x0000001C0000000E) { if (logarithmic_delay_run(300, 500)) Mouse.move(0, -1); repeat_action=1;  } //up
+    else if (current_event_code == 0x000000010000000E) {
+      Keyboard.press(HID_KEYBOARD_RIGHT_CONTROL);
+      Keyboard.press('+');
+      Keyboard.releaseAll();
+    }
+    else if (current_event_code == 0x000000070000000E) {
+      Keyboard.press(HID_KEYBOARD_LEFT_CONTROL);
+      Keyboard.press('-');
+      Keyboard.releaseAll();
+    }
+    else if (current_event_code == 0x0000001C0000000E) { if (logarithmic_delay_run(300, 500)) Mouse.move(0, -1); repeat_action=1; } //up
     else if (current_event_code == 0x0000000700040007) { if (logarithmic_delay_run(300, 500)) Mouse.move(-1, 0); repeat_action=1; } //left
     else if (current_event_code == 0x0000001D0000000E) { if (logarithmic_delay_run(300, 500)) Mouse.move(0,  1); repeat_action=1; } //down
     else if (current_event_code == 0x000000120000000E) { if (logarithmic_delay_run(300, 500)) Mouse.move(1,  0); repeat_action=1; } //right
     else if (current_event_code == 0x000000250000000E) Mouse.click(MOUSE_LEFT);
     else if (current_event_code == 0x0000003B0000000E) Mouse.click(MOUSE_RIGHT);
+    else if (current_event_code == 0x000000000000000E) Mouse.click(MOUSE_MIDDLE);
     else return 1;
 
     last_jiggle=millis();
@@ -280,10 +293,10 @@ void IREventHandler(){
 
 
 void setup() {
-  pinMode(0, OUTPUT);
-  digitalWrite(0, LOW);
-  pinMode(1, OUTPUT);
-  digitalWrite(1, HIGH);
+//  pinMode(0, OUTPUT);
+//  digitalWrite(0, LOW);
+//  pinMode(1, OUTPUT);
+//  digitalWrite(1, HIGH);
 
   pinMode(IR_RECEIVE_PIN, INPUT_PULLUP);
   IrReceiver.begin(IR_RECEIVE_PIN);
@@ -313,9 +326,7 @@ void loop() {
   }
 
   if (mouse_jiggler && millis()-last_jiggle>50000){
-    Mouse.move(+10, 0);
-    Mouse.move(-10, 0);
-    
+    Keyboard.write(HID_KEYBOARD_LEFT_CONTROL);
     last_jiggle=millis();
   }
 
